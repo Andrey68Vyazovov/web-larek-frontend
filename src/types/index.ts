@@ -1,6 +1,4 @@
-export type Id = string;
-export type Price = number | null;
-export type PaymentMethod = '' |'card' | 'cash';
+export type PaymentMethod = 'card' | 'cash';
 
 // базовый тип для товара
 export interface IBaseProduct {
@@ -8,13 +6,12 @@ export interface IBaseProduct {
 	image: string;
 	title: string;
 	category: string;
-	price: Price;
+	price: number | null;
 }
 
 // типизация объекта с данными товара полученным от сервера
 export type IProduct = IBaseProduct & {
-	id: Id;
-	status: boolean;
+	id: string;
 }
 
 // типизация данных заказа для отправки на сервер
@@ -32,15 +29,15 @@ export interface IDeliveryForm {
 
 // типизация данных заказа для отправки на сервер
 export type IOrder = IContactForm & {
-		items: Id[];
-    payment: PaymentMethod;
+		items: string[];
+    payment: PaymentMethod | null;
 		total: number;
 	};
 
 // типизация ответа сервера после отправки заказа
 export interface IOrderResult {
-	id: Id;
-	total: Price;
+	id: string;
+	total: number | null;
 }
 
 // типизация ошибок при заполнении форм

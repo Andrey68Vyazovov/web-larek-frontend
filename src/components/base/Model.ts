@@ -10,6 +10,5 @@ export abstract class Model<T> {
     }
     emitChanges(event: string, payload?: object): void {
         this.events.emit(event, payload ?? {});
-        console.log(this);
     }
 }

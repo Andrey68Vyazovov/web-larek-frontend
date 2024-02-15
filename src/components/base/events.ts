@@ -23,7 +23,7 @@ export class EventEmitter implements IEvents {
 
     constructor() {
         this._events = new Map<EventName, Set<Subscriber>>();
-        console.log(this._events);
+        //console.log(this._events);
     }
 
     /**

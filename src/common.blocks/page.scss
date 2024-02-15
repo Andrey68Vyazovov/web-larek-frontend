@@ -8,6 +8,10 @@ html, body.page {
 	background: $background;
 }
 
+.page::-webkit-scrollbar { 
+  width: 0; 
+}
+
 .page__wrapper {
 	width: 100%;
 

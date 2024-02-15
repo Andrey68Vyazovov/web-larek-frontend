@@ -4,6 +4,7 @@
 .gallery {
   @include mixins.container;
   @include mixins.grid(600px, 24px);
+  margin-top: $headerHeight;
 
   &__item {
     border: none;
@@ -15,3 +16,4 @@
     }
   }
 }
+
