@@ -1,6 +1,7 @@
 import { Component } from '../base/Component';
 import { IBaseProduct } from '../../types/index';
 import { ensureElement, formatNumber } from '../../utils/utils';
+import { cardCategory } from '../../utils/constants';
 
 interface ICardActions {
 	onClick: (event: MouseEvent) => void;
@@ -9,15 +10,8 @@ interface ICardActions {
 // типизация карточки товара для рендера на странице
 export type ICard = IBaseProduct & {
 	button?: string;
-}
-
-type ICardCategory = {
-	'софт-скил': string;
-	другое: string,
-	дополнительное: string,
-	кнопка: string,
-	'хард-скил': string,
-}
+	description?: string;
+};
 
 export class Card extends Component<ICard> {
 	protected _category: HTMLElement;
@@ -25,33 +19,36 @@ export class Card extends Component<ICard> {
 	protected _image: HTMLImageElement;
 	protected _button?: HTMLButtonElement;
 	protected _price: HTMLElement;
+	protected _description?: HTMLElement;
 
-	private cardCategory: ICardCategory;
-
-	constructor( protected element: string, container: HTMLElement, actions?: ICardActions) {
+	constructor(
+		protected element: string,
+		container: HTMLElement,
+		actions?: ICardActions
+	) {
 		super(container);
-		this.cardCategory = {
-			'софт-скил': '_soft',
-			другое: '_other',
-			дополнительное: '_additional',
-			кнопка: '_button',
-			'хард-скил': '_hard'
-		}
-		this._category = ensureElement<HTMLElement>(`.${element}__category`, container);
+
+		this._category = ensureElement<HTMLElement>(
+			`.${element}__category`,
+			container
+		);
 		this._title = ensureElement<HTMLElement>(`.${element}__title`, container);
-		this._image = ensureElement<HTMLImageElement>(`.${element}__image`, container);
+		this._image = ensureElement<HTMLImageElement>(
+			`.${element}__image`,
+			container
+		);
 		this._button = container.querySelector(`.${element}__button`);
 		this._price = ensureElement<HTMLElement>(`.${element}__price`, container);
+		this._description = container.querySelector(`.${element}__text`);
 		if (actions?.onClick) {
-			if (this._button)	{
+			if (this._button) {
 				this._button.addEventListener('click', actions.onClick);
 			} else {
 				container.addEventListener('click', actions.onClick);
-			};
+			}
 		}
-		//console.log(this);
 	}
-	
+
 	set id(value: string) {
 		this.container.dataset.id = value;
 	}
@@ -76,20 +73,19 @@ export class Card extends Component<ICard> {
 		this.setText(this._button, value);
 	}
 
-	set category(value: keyof ICardCategory) {
+	set category(value: string) {
 		this.setText(this._category, value);
-		this._category.classList.add(`card__category${this.cardCategory[value]}`);
-
+		this._category.classList.add(`card__category${cardCategory[value]}`);
 	}
 
 	set price(value: number) {
-		if(value){
-		this.setText(this._price, `${formatNumber(value)} синапсов`);}
-		else {
-		this.setText(this._price, 'Бесценно');
-		if(this._button){
-			this._button.setAttribute('disabled', '');
-		}
+		if (value) {
+			this.setText(this._price, `${formatNumber(value)} синапсов`);
+		} else {
+			this.setText(this._price, 'Бесценно');
+			if (this._button) {
+				this._button.setAttribute('disabled', '');
+			}
 		}
 	}
 
@@ -97,6 +93,9 @@ export class Card extends Component<ICard> {
 		return Number(this._price.textContent);
 	}
 
+	set description(value: string) {
+		this.setText(this._description, value);
+	}
 }
 
 export interface ICardBasket {
@@ -112,10 +111,13 @@ export class BasketCard extends Component<ICardBasket> {
 
 	constructor(container: HTMLElement, num: number, actions?: ICardActions) {
 		super(container);
-		this.setText(this._number, num+1);
+		this.setText(this._number, num + 1);
 		this._title = ensureElement<HTMLElement>(`.card__title`, container);
 		this._price = ensureElement<HTMLElement>(`.card__price`, container);
-		this._buttonDelete = ensureElement<HTMLButtonElement>(`.card__button`, container);
+		this._buttonDelete = ensureElement<HTMLButtonElement>(
+			`.card__button`,
+			container
+		);
 		this._buttonDelete.addEventListener('click', (event: MouseEvent) => {
 			event.preventDefault();
 			actions.onClick(event);
@@ -133,9 +135,9 @@ export class BasketCard extends Component<ICardBasket> {
 	}
 
 	set price(value: number) {
-		value?
-		this.setText(this._price, `${formatNumber(value)} синапсов`):
-		this.setText(this._price, 'Бесценно');
+		value
+			? this.setText(this._price, `${formatNumber(value)} синапсов`)
+			: this.setText(this._price, 'Бесценно');
 	}
 
 	render(data: ICardBasket): HTMLElement {

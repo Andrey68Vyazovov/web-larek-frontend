@@ -21,7 +21,7 @@ export class Basket extends Component<IBasket> {
 		if (this._button) {
 			this._button.addEventListener('click', () => {
 				events.emit('delivery:open');
-			}); 
+			});
 		}
 
 		this.items = [];
@@ -32,9 +32,11 @@ export class Basket extends Component<IBasket> {
 			this._list.replaceChildren(...items); // новая запись аппенд
 			this.setDisabled(this._button, false);
 		} else {
-			this._list.replaceChildren(createElement<HTMLParagraphElement>('p', {
+			this._list.replaceChildren(
+				createElement<HTMLParagraphElement>('p', {
 					textContent: 'Корзина пуста',
-				}));
+				})
+			);
 			this.setDisabled(this._button, true);
 		}
 	}

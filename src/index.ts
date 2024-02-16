@@ -6,7 +6,7 @@ import { EventEmitter } from './components/base/events';
 import { AppModel, CatalogChangeEvent, Product } from './components/AppData';
 import { Page } from './components/common/Page';
 import { Card, BasketCard } from './components/common/Card';
-import { cloneTemplate, ensureElement, createElement, } from './utils/utils';
+import { cloneTemplate, ensureElement, createElement } from './utils/utils';
 import { Modal } from './components/common/Modal';
 import { Basket } from './components/common/Basket';
 import { Contacts } from './components/Contacts';
@@ -32,7 +32,7 @@ const appData = new AppModel({}, events);
 
 // Глобальные контейнеры
 const page = new Page(document.body, events);
-const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events); //ONO
+const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 
 //  Переиспользуемые части интерфейса
 const basket = new Basket(cloneTemplate(basketTemplate), events);
@@ -43,7 +43,7 @@ const contactsForm = new Contacts(cloneTemplate(contactsTemplate), events);
 
 // изменились элементы каталога в модели данных
 events.on<CatalogChangeEvent>('catalog:change', () => {
-  page.catalog = appData.catalog.map(product => {
+	page.catalog = appData.catalog.map((product) => {
 		const card = new Card('card', cloneTemplate(cardCatalogTemplate), {
 			onClick: () => events.emit('preview:change', product),
 		});
@@ -54,45 +54,31 @@ events.on<CatalogChangeEvent>('catalog:change', () => {
 			price: product.price,
 		});
 	});
-  page.counter = appData.getOrderedProducts().length;
+	page.counter = appData.getOrderedProducts().length;
 });
 
 //
 events.on('preview:change', (item: Product) => {
 	if (item) {
-		api
-			.getProduct(item.id)
-			.then((result) => {
-				item.category = result.category;
-				item.title = result.title;
-				item.description = result.description;
-				item.image = result.image;
-				item.price = result.price;
-
-				const card = new Card('card', cloneTemplate(cardPreviewTemplate), {
-					onClick: () => {
-						if (appData.productOrdered(item)) {
-							events.emit('product:delete', item);
-						} else {
-							events.emit('product:added', item);
-						}
-					}
-				});
-
-				modal.render({
-					content: card.render({
-						category: item.category,
-						title: item.title,
-						description: item.description,
-						image: item.image,
-						price: item.price,
-						button: appData.productOrdered(item) ? 'Убрать' : 'Купить',
-					}),
-				});
-			})
-			.catch((err) => {
-				console.error(err);
-			});
+		const card = new Card('card', cloneTemplate(cardPreviewTemplate), {
+			onClick: () => {
+				if (appData.productOrdered(item)) {
+					events.emit('product:delete', item);
+				} else {
+					events.emit('product:added', item);
+				}
+			},
+		});
+		modal.render({
+			content: card.render({
+				category: item.category,
+				title: item.title,
+				description: item.description,
+				image: item.image,
+				price: item.price,
+				button: appData.productOrdered(item) ? 'Убрать' : 'Купить',
+			}),
+		});
 	} else {
 		modal.close();
 	}
@@ -112,10 +98,10 @@ events.on('product:delete', (item: Product) => {
 
 // Открыть форму доставки
 events.on('delivery:open', () => {
-  deliveryForm.setClass('');
+	deliveryForm.setClass('card');
+	appData.setPaymentMethod('card');
 	modal.render({
 		content: deliveryForm.render({
-			payment: null,
 			address: '',
 			valid: false,
 			errors: [],
@@ -129,7 +115,7 @@ events.on('payment:changed', (data: { target: PaymentMethod }) => {
 });
 
 // Отправлена формы доставки
-	events.on('order:submit', () => {
+events.on('order:submit', () => {
 	modal.render({
 		content: contactsForm.render({
 			phone: '',
@@ -156,18 +142,24 @@ events.on('contacts:open', () => {
 events.on('formContactsErrors:change', (errors: Partial<IContactForm>) => {
 	const { email, phone } = errors;
 	contactsForm.valid = !email && !phone;
-	contactsForm.errors = Object.values({ phone, email }).filter((i) => !!i).join('; ');
+	contactsForm.errors = Object.values({ phone, email })
+		.filter((i) => !!i)
+		.join('; ');
 });
 
 // Изменилось состояние валидации формы доставки
 events.on('formDeliveryError:change', (errors: Partial<IDeliveryForm>) => {
 	const { payment, address } = errors;
 	deliveryForm.valid = !payment && !address;
-	deliveryForm.errors = Object.values({ payment, address }).filter((i) => !!i).join('; ');
+	deliveryForm.errors = Object.values({ payment, address })
+		.filter((i) => !!i)
+		.join('; ');
 });
 
 // Изменилось одно из полей контактов
-events.on(/^contacts\..*:change/, (data: { field: keyof IContactForm; value: string }) => {
+events.on(
+	/^contacts\..*:change/,
+	(data: { field: keyof IContactForm; value: string }) => {
 		appData.setContactsField(data.field, data.value);
 	}
 );
@@ -180,17 +172,22 @@ events.on('order.address:change', (data: { value: string }) => {
 // Отправлена форма заказа
 events.on('contacts:submit', () => {
 	appData.setOrder();
-	api.orderProducts(appData.order)
+	api
+		.orderProducts(appData.order)
 		.then((result) => {
-			const confirm = new Confirm(cloneTemplate(confirmTemplate), appData.order.total,{
+			const confirm = new Confirm(
+				cloneTemplate(confirmTemplate),
+				appData.order.total,
+				{
 					onClick: () => {
 						modal.close();
-						appData.resetBasket();
-						deliveryForm.setClass('');
-						events.emit('basket:change');
-					}
-			});
-			modal.render({content: confirm.render({})});
+					},
+				}
+			);
+			modal.render({ content: confirm.render({}) });
+			appData.resetBasket();
+			deliveryForm.setClass('');
+			events.emit('basket:change');
 		})
 		.catch((err) => {
 			console.error(err);
@@ -212,9 +209,9 @@ events.on('basket:change', () => {
 			onClick: () => {
 				appData.deleteProduct(product.id);
 				basket.total = appData.getTotalOrder();
-			}
+			},
 		});
-		return card.render({title: product.title, price: product.price});
+		return card.render({ title: product.title, price: product.price });
 	});
 	basket.total = appData.getTotalOrder();
 });
@@ -235,24 +232,4 @@ api
 	.then(appData.setCatalog.bind(appData))
 	.catch((err) => {
 		console.error(err);
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	});

@@ -12,7 +12,7 @@ export interface IBaseProduct {
 // типизация объекта с данными товара полученным от сервера
 export type IProduct = IBaseProduct & {
 	id: string;
-}
+};
 
 // типизация данных заказа для отправки на сервер
 export interface IContactForm {
@@ -29,15 +29,15 @@ export interface IDeliveryForm {
 
 // типизация данных заказа для отправки на сервер
 export type IOrder = IContactForm & {
-		items: string[];
-    payment: PaymentMethod | null;
-		total: number;
-	};
+	items: string[];
+	payment: PaymentMethod;
+	total: number;
+};
 
 // типизация ответа сервера после отправки заказа
 export interface IOrderResult {
 	id: string;
-	total: number | null;
+	total: number;
 }
 
 // типизация ошибок при заполнении форм

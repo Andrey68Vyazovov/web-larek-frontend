@@ -1,6 +1,7 @@
-@use "variables" as *;
+@use 'variables' as *;
 
-html, body.page {
+html,
+body.page {
 	height: 100%;
 	font-family: $font;
 	font-size: $baseFontSize;
@@ -8,8 +9,8 @@ html, body.page {
 	background: $background;
 }
 
-.page::-webkit-scrollbar { 
-  width: 0; 
+.page::-webkit-scrollbar {
+	width: 0;
 }
 
 .page__wrapper {
